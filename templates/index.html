@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/solid.css" integrity="sha384-Tv5i09RULyHKMwX0E8wJUqSOaXlyu3SQxORObAI08iUwIalMmN5L6AvlPX2LMoSE" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/regular.css" integrity="sha384-e7wK18mMVsIpE/BDLrCQ99c7gROAxr9czDzslePcAHgCLGCRidxq1mrNCLVF2oaj" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/fontawesome.css" integrity="sha384-jLKHWM3JRmfMU0A5x5AkjWkw/EYfGUAGagvnfryNV3F9VqM98XiIH7VBGVoxVSc7" crossorigin="anonymous">
+</head>
+<body>
+<div class="container">
+    <div class="row" style="margin-top: 100px">
+        <div class="col-lg-12">
+            <h1 class="text-center">Real Time Crypto Currency Price</h1>
+        </div>
+        <div class="row" style="margin-top: 100px">
+            {% for humanized_symbol, data in change_data.items %}
+                <div class="col-lg-4 text-center">
+                    <h3>{{ humanized_symbol }}</h3>
+                    {% if data.change > 0.00 %}
+                        <h4 id="{{ data.symbol }}" style="color: green">
+                            {{ data.price }}
+                            <i class="fas fa-caret-up" style="color: green"></i>
+                        </h4>
+                    {% elif data.change < 0.00 %}
+                        <h4 id="{{ data.symbol }}" style="color: red">
+                            {{ data.price }} <i class="fas fa-caret-down" style="color: red"></i>
+                        </h4>
+                    {% elif data.change == 0.00 %}
+                        <h4 id="{{ data.symbol }}" style="color: black">
+                            {{ data.price }}
+                        </h4>
+                    {% endif %}
+                    <h5><span id="{{ data.symbol }}_change_value">
+                        {% if data.change > 0.00 %}
+                            +{{ data.change }}
+                        {% else %}
+                            {{ data.change }}
+                        {% endif %}
+                    </span></h5>
+                </div>
+            {% endfor %}
+            <!--
+            <div class="col-lg-4 text-center">
+                <h3>ETH/$</h3> <h4 id="ETHUSDT"></h4>
+                <h5><span id="ETHUSDT_change_value"></span></h5>
+            </div>
+            <div class="col-lg-4 text-center">
+                <h3>BTC/$</h3>
+                <h4 id="BTCUSDT"></h4>
+                <h5><span id="BTCUSDT_change_value"></span></h5>
+            </div>
+            <div class="col-lg-4 text-center">
+                <h3>BNB/$</h3>
+                <h4 id="BNBUSDT"></h4>
+                <h5><span id="BNBUSDT_change_value"></span></h5>
+            </div>
+            -->
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+</body>
+<script type="text/javascript">
+    let socket = new WebSocket('ws://localhost:8000/ws/main_consumer/coin_stream/');
+    socket.onmessage = function (event) {
+        let data = JSON.parse(event.data);
+        let current_price = data.message["current_price"]
+        let symbol = data.message["symbol"]
+        let change_value = data.message["change_value"]
+        let symbol_element = document.getElementById(symbol)
+        let change_element = document.getElementById(symbol + "_change_value")
+
+        if (change_value > 0.00){
+            change_element.innerHTML = "+" + String(change_value)
+            symbol_element.innerHTML = String(current_price) + " " + '<i class="fas fa-caret-up" style="color: green"></i>'
+            symbol_element.style.color = "green"
+
+        } else if (change_value < 0.00) {
+            change_element.innerHTML = String(change_value)
+            symbol_element.innerHTML = String(current_price) + " " + '<i class="fas fa-caret-down" style="color: red"></i>'
+            symbol_element.style.color = "red"
+        } else if (change_value === 0.00) {
+            change_element.innerText = change_value
+            symbol_element.style.color = "black"
+        } else {
+            change_element.innerText = change_value
+            symbol_element.style.color = "black"
+        }
+    }
+    socket.onclose = function (event){
+        console.log("connection closed")
+    }
+
+    socket.onerror = function (event){
+        console.log("connection error")
+    }
+</script>
+</html>
