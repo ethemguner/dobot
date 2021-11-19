@@ -12,9 +12,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 import dj_database_url
-
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -153,7 +152,7 @@ DATABASES['default'] = dj_database_url.config()
 
 # Celery stuff.
 BROKER_URL = 'amqp://localhost'
-CELERY_RESULT_BACKEND = 'redis://:pca6ff2f9710f43f9dadbc37adc2fff0f8df1ea07b19709489b9ef2e274b26b45@ec2-54-170-202-135.eu-west-1.compute.amazonaws.com:26209'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
