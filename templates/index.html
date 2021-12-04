@@ -12,9 +12,9 @@
 <div class="container">
     <div class="row" style="margin-top: 100px">
         <div class="col-lg-12">
-            <h1 class="text-center">Real Time Crypto Currency Price</h1>
+            <h1 class="text-center">Real Time Crypto Currency Price Tracker</h1>
         </div>
-        <div class="row" style="margin-top: 100px">
+        <div class="row justify-content-center" style="margin-top: 100px;">
             {% for humanized_symbol, data in change_data.items %}
                 <div class="col-lg-4 text-center">
                     <h3>{{ humanized_symbol }}</h3>
@@ -32,6 +32,7 @@
                             {{ data.price }}
                         </h4>
                     {% endif %}
+                    <h4>Change:</h4>
                     <h5><span id="{{ data.symbol }}_change_value">
                         {% if data.change > 0.00 %}
                             +{{ data.change }}
@@ -41,36 +42,69 @@
                     </span></h5>
                 </div>
             {% endfor %}
-            <!--
-            <div class="col-lg-4 text-center">
-                <h3>ETH/$</h3> <h4 id="ETHUSDT"></h4>
-                <h5><span id="ETHUSDT_change_value"></span></h5>
+            <div style="margin-top: 50px;">
+                <h3 class="text-center">Change Graph</h3>
+                <div class="row justify-content-center">
+                    <canvas id="myChart" height="20vh" width="80vw"></canvas>
+                </div>
             </div>
-            <div class="col-lg-4 text-center">
-                <h3>BTC/$</h3>
-                <h4 id="BTCUSDT"></h4>
-                <h5><span id="BTCUSDT_change_value"></span></h5>
-            </div>
-            <div class="col-lg-4 text-center">
-                <h3>BNB/$</h3>
-                <h4 id="BNBUSDT"></h4>
-                <h5><span id="BNBUSDT_change_value"></span></h5>
-            </div>
-            -->
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
 </body>
+
 <script type="text/javascript">
+    const data = {
+      labels: [],
+      datasets: [{
+        label: 'BTC Changes',
+        backgroundColor: 'rgb(255, 99, 132)',
+        borderColor: 'rgb(255, 99, 132)',
+        data: [],
+      }]
+    };
+
+    const config = {
+        type: 'line',
+        data: data,
+        options: {
+
+        }
+    }
+
+    const myChart = new Chart(
+    document.getElementById('myChart'),
+        config
+    );
+
+    function addData(chart, label, data) {
+        if (chart.data.labels.length > 50){
+                chart.data.labels.shift()
+            }
+        chart.data.labels.push(label);
+        chart.data.datasets.forEach((dataset) => {
+            if (dataset.data.length > 50){
+                dataset.data.shift()
+            }
+            dataset.data.push(data);
+        });
+        chart.update();
+    }
+
     let ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
     let socket = new WebSocket(ws_scheme + '://localhost:8000/ws/main_consumer/coin_stream/');
+    var previous_data = null;
     socket.onmessage = function (event) {
         let data = JSON.parse(event.data);
         let current_price = data.message["current_price"]
         let symbol = data.message["symbol"]
         let change_value = data.message["change_value"]
+        let created = data.message["created"]
         let symbol_element = document.getElementById(symbol)
         let change_element = document.getElementById(symbol + "_change_value")
 
@@ -90,6 +124,12 @@
             change_element.innerText = change_value
             symbol_element.style.color = "black"
         }
+
+        if (change_value !== previous_data && symbol === "BTCUSDT"){
+            addData(myChart, created, parseFloat(change_value))
+        }
+
+        previous_data = change_value
     }
     socket.onclose = function (event){
         console.log("connection closed")
