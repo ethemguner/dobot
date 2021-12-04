@@ -16,6 +16,8 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 # Load task modules from all registered Django apps.
 app.autodiscover_tasks()
 
+UPDATE_COINS_FREQUENCY = 2.35
+
 
 @app.task(bind=True)
 def debug_task(self):
@@ -25,7 +27,7 @@ def debug_task(self):
 @app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
     # sender.add_periodic_task(180.0, get_klines.s(), name='get_klines')
-    sender.add_periodic_task(5.0, update_coins_prices.s(), name='update_coins_prices')
+    sender.add_periodic_task(UPDATE_COINS_FREQUENCY, update_coins_prices.s(), name='update_coins_prices')
 
 
 @app.task
