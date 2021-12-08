@@ -35,9 +35,9 @@
                     <h4>Change:</h4>
                     <h5><span id="{{ data.symbol }}_change_value">
                         {% if data.change > 0.00 %}
-                            +{{ data.change }}
+                            +{{ data.change }}$ (+{{ data.change_ratio }}%)
                         {% else %}
-                            {{ data.change }}
+                            {{ data.change }}$ ({{ data.change_ratio }}%)
                         {% endif %}
                     </span></h5>
                 </div>
@@ -45,6 +45,9 @@
             <div style="margin-top: 50px;">
                 <h3 class="text-center">Change Graph</h3>
                 <div class="row justify-content-center">
+                    <div class="text-center" style="margin-bottom: 20px">
+                        Total change from {{ first_change.created }} is <b><span id="total_change"></span></b>
+                    </div>
                     <canvas id="myChart" height="20vh" width="80vw"></canvas>
                 </div>
             </div>
@@ -62,7 +65,7 @@
     const data = {
       labels: [],
       datasets: [{
-        label: 'BTC Changes',
+        label: 'BTC Percental Changes in 2.35 seconds',
         backgroundColor: 'rgb(255, 99, 132)',
         borderColor: 'rgb(255, 99, 132)',
         data: [],
@@ -73,7 +76,31 @@
         type: 'line',
         data: data,
         options: {
-
+            scales: {
+                x: {
+                  title: {
+                      display: true,
+                      text: "Datetime",
+                      font: {
+                          size: 15
+                      }
+                  }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: "Change (%)",
+                        font: {
+                            size: 15
+                      }
+                    },
+                    ticks: {
+                        callback: function (value, index, values) {
+                            return "%" + value;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -104,29 +131,36 @@
         let current_price = data.message["current_price"]
         let symbol = data.message["symbol"]
         let change_value = data.message["change_value"]
+        let change_ratio = data.message["change_ratio"]
+        let total_change = data.message["total_change"]
+        let from_date = data.message["total_change"]
         let created = data.message["created"]
         let symbol_element = document.getElementById(symbol)
         let change_element = document.getElementById(symbol + "_change_value")
+        let total_change_element = document.getElementById("total_change")
 
         if (change_value > 0.00){
-            change_element.innerHTML = "+" + String(change_value)
+            change_element.innerHTML = "+" + String(change_value) + "$" + " " + String(`(+${change_ratio}%)`)
             symbol_element.innerHTML = String(current_price) + " " + '<i class="fas fa-caret-up" style="color: green"></i>'
             symbol_element.style.color = "green"
-
         } else if (change_value < 0.00) {
-            change_element.innerHTML = String(change_value)
+            change_element.innerHTML = String(change_value) + "$" + " " + String(`(${change_ratio}%)`)
             symbol_element.innerHTML = String(current_price) + " " + '<i class="fas fa-caret-down" style="color: red"></i>'
             symbol_element.style.color = "red"
         } else if (change_value === 0.00) {
-            change_element.innerText = change_value
+            change_element.innerText = String(change_value) + "$" + " " + String(`(${change_ratio}%)`)
+            symbol_element.innerHTML = String(current_price)
             symbol_element.style.color = "black"
         } else {
-            change_element.innerText = change_value
+            change_element.innerText = String(change_value) + "$" + " " + String(`(${change_ratio}%)`)
+            symbol_element.innerHTML = String(current_price)
             symbol_element.style.color = "black"
         }
 
+        total_change_element.innerText = String(total_change) + "%"
+
         if (change_value !== previous_data && symbol === "BTCUSDT"){
-            addData(myChart, created, parseFloat(change_value))
+            addData(myChart, created, parseFloat(change_ratio))
         }
 
         previous_data = change_value

@@ -7,6 +7,9 @@ from django.utils import timezone
 
 from coins.models import Coin, CoinPriceChange
 from data_types.models import Kline
+from decision_maker.models import DecisionSetting, Decision
+from transactions.models import Transaction
+from wallet.models import Wallet
 
 
 class BinanceInterface:
@@ -122,7 +125,13 @@ class BinanceInterface:
             coin=coin,
             price=new_price,
             change=self._get_value_as_decimal(new_price) - previous_price,
+            change_ratio=self._get_change_ratio(new_price, previous_price)
         )
+
+    @staticmethod
+    def _get_change_ratio(new_price, previous_price):
+        change_value = float(new_price) - float(previous_price)
+        return Decimal(float((change_value / float(new_price)) * 100)).quantize(Decimal("0.0000"))
 
     def update_coins_prices(self):
         """Updates price of coins that available for our system.
@@ -146,6 +155,8 @@ class BinanceInterface:
                     if ticker.get("symbol") == coin.symbol:
                         previous_price = coin.current_price
                         coin.current_price = float(ticker.get("price"))
+                        if coin.symbol == coin.COIN_BTC:
+                            self.decide(float(ticker.get("price")))
                         coin.last_update = timezone.now()
                         coin.save()
                         self.create_price_change(
@@ -154,3 +165,78 @@ class BinanceInterface:
                             ticker.get("price")
                         )
                         updated_coins.append(coin)
+
+    def decide(self, current_price):
+        decision_settings = DecisionSetting.objects.first()
+        change_value = current_price - float(decision_settings.entry_price_level)
+
+        ratio = float((change_value / current_price) * 100)
+
+        # TODO: by desicion
+        if ratio > 0 and ratio > decision_settings.ratio_to_sell and not decision_settings.dont_sell:
+            self.sell(current_price, decision_settings)
+        if 0 > ratio < decision_settings.ratio_to_buy and not decision_settings.dont_buy:
+            self.buy(current_price, decision_settings)
+
+    @staticmethod
+    def sell(current_price, decision_settings):
+        wallet = Wallet.objects.first()
+        new_balance = (float(wallet.coin_balance) * current_price)
+        fee = (new_balance / 100) * 0.05
+        new_balance -= fee
+        wallet.total_balance = new_balance
+        wallet.coin_balance = 0
+        wallet.save()
+
+        coin = Coin.objects.get(symbol=Coin.COIN_BTC)
+
+        decision = Decision.objects.create(
+            type_of_decision=Decision.TYPE_SELL,
+            coin=coin,
+            price_level=float(current_price),
+        )
+
+        Transaction.objects.create(
+            transaction_type=Transaction.TYPE_SELL,
+            coin=coin,
+            wallet=wallet,
+            decision=decision,
+        )
+
+        decision_settings.entry_price_level = float(current_price)
+        decision_settings.dont_sell = True
+        decision_settings.dont_buy = False
+        decision_settings.save()
+
+    @staticmethod
+    def buy(current_price, decision_settings):
+        wallet = Wallet.objects.first()
+        new_coin_balance = (float(wallet.total_balance) / current_price)
+        wallet.total_balance = 0
+        wallet.coin_balance = new_coin_balance
+        wallet.save()
+
+        coin = Coin.objects.get(symbol=Coin.COIN_BTC)
+
+        decision = Decision.objects.create(
+            type_of_decision=Decision.TYPE_BUY,
+            coin=Coin.objects.get(symbol=Coin.COIN_BTC),
+            price_level=float(current_price),
+        )
+
+        Transaction.objects.create(
+            transaction_type=Transaction.TYPE_BUY,
+            coin=coin,
+            wallet=wallet,
+            decision=decision,
+        )
+
+        decision_settings.entry_price_level = float(current_price)
+        decision_settings.dont_sell = False
+        decision_settings.dont_buy = True
+        decision_settings.save()
+
+
+
+
+

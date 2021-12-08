@@ -1,11 +1,12 @@
 from django.shortcuts import render
 
-from coins.models import CoinPriceChange
+from coins.models import CoinPriceChange, Coin
 
 
 def dashboard(request):
     change_data = CoinPriceChange.get_last_change_data()
-    return render(request, "index.html", context={"change_data": change_data})
+    first_change = CoinPriceChange.objects.filter(coin__symbol=Coin.COIN_BTC).first()
+    return render(request, "index.html", context={"change_data": change_data, "first_change": first_change})
 
 
 def test(request):
