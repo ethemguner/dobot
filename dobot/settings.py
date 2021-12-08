@@ -39,7 +39,10 @@ INSTALLED_APPS = [
     'django_extensions',
     'data_types',
     'coins',
-    'channels'
+    'channels',
+    'wallet',
+    'decision_maker',
+    'transactions'
 ]
 
 MIDDLEWARE = [

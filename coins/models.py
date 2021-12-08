@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 
 
@@ -61,13 +63,20 @@ class CoinPriceChange(models.Model):
         blank=True,
         on_delete=models.CASCADE
     )
+    change_ratio = models.DecimalField(
+        verbose_name="Change",
+        max_digits=19,
+        decimal_places=4,
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
         if self.change > 0:
             change = "+" + str(self.change)
         else:
             change = self.change
-        return f"{self.coin.symbol} | {change} | {self.price}"
+        return f"{self.coin.symbol} | {change}% | {self.price}"
 
     @classmethod
     def get_last_change_data(cls):
@@ -81,7 +90,8 @@ class CoinPriceChange(models.Model):
             change_data[humanized_symbol] = {
                 "symbol": coin.symbol,
                 "price": coin_price_change.price,
-                "change": coin_price_change.change
+                "change": coin_price_change.change,
+                "change_ratio": Decimal(coin_price_change.change_ratio).quantize(Decimal('0.00000'))
             }
         return change_data
 
