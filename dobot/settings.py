@@ -9,10 +9,12 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+from os import environ
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+from django.core.exceptions import ImproperlyConfigured
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
@@ -27,8 +29,11 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 
-# Application definition
+def get_env_setting(setting):
+    return environ.get(setting)
 
+
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -84,10 +89,10 @@ ASGI_APPLICATION = 'dobot.asgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "dobotdb",
-        "USER": "dobot",
-        "PASSWORD": "safa0606",
-        "HOST": "localhost",
+        "NAME": get_env_setting("DBNAME") or "dobotdb",
+        "USER": get_env_setting("DBUSER") or "dobot",
+        "PASSWORD": get_env_setting("DBPASSWORD") or "safa0606",
+        "HOST": get_env_setting("DBHOST") or "localhost",
         "PORT": "5432",
     }
 }
