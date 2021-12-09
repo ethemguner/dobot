@@ -124,7 +124,7 @@
     }
 
     let ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
-    let socket = new WebSocket(ws_scheme + window.location.host + "/ws/main_consumer/coin_stream/");
+    let socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/main_consumer/coin_stream/");
     var previous_data = null;
     socket.onmessage = function (event) {
         let data = JSON.parse(event.data);
