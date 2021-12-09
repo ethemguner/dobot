@@ -12,7 +12,10 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 from os import environ
 from pathlib import Path
 
+import rollbar
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+
 from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,7 +32,7 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 
-def get_env_setting(setting):
+def get_environment_variable(setting):
     return environ.get(setting)
 
 
@@ -58,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'rollbar.contrib.django.middleware.RollbarNotifierMiddleware'
 ]
 
 ROOT_URLCONF = 'dobot.urls'
@@ -89,10 +93,10 @@ ASGI_APPLICATION = 'dobot.asgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": get_env_setting("DBNAME") or "dobotdb",
-        "USER": get_env_setting("DBUSER") or "dobot",
-        "PASSWORD": get_env_setting("DBPASSWORD") or "safa0606",
-        "HOST": get_env_setting("DBHOST") or "localhost",
+        "NAME": get_environment_variable("DBNAME") or "dobotdb",
+        "USER": get_environment_variable("DBUSER") or "dobot",
+        "PASSWORD": get_environment_variable("DBPASSWORD") or "safa0606",
+        "HOST": get_environment_variable("DBHOST") or "localhost",
         "PORT": "5432",
     }
 }
@@ -161,3 +165,15 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Europe/Istanbul'
+
+
+# TODO: get_environment_variable
+ROLLBAR_ACCESS_TOKEN = "ec4c306cbaef49e48680d79f3b37c9ff"
+
+ROLLBAR = {
+    'access_token': ROLLBAR_ACCESS_TOKEN,
+    'environment': 'production',
+    'root': BASE_DIR,
+}
+
+rollbar.init(**ROLLBAR)
