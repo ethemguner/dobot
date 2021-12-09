@@ -124,7 +124,7 @@
     }
 
     let ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
-    let socket = new WebSocket(ws_scheme + '://localhost:8000/ws/main_consumer/coin_stream/');
+    let socket = new WebSocket(ws_scheme + window.location.host + "/ws/main_consumer/coin_stream/");
     var previous_data = null;
     socket.onmessage = function (event) {
         let data = JSON.parse(event.data);
@@ -133,7 +133,6 @@
         let change_value = data.message["change_value"]
         let change_ratio = data.message["change_ratio"]
         let total_change = data.message["total_change"]
-        let from_date = data.message["total_change"]
         let created = data.message["created"]
         let symbol_element = document.getElementById(symbol)
         let change_element = document.getElementById(symbol + "_change_value")
