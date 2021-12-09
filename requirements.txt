@@ -84,6 +84,7 @@ vine==5.0.0
 wcwidth==0.2.5
 websocket-client==1.2.1
 websockets==9.1
+whitenoise==5.3.0
 wrapt==1.13.3
 yarl==1.7.2
 zipp==3.6.0
