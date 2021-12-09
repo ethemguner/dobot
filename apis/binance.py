@@ -180,6 +180,8 @@ class BinanceInterface:
 
     @staticmethod
     def sell(current_price, decision_settings):
+        """Sells coin from its current price according to decision settings.
+        """
         wallet = Wallet.objects.first()
         new_balance = (float(wallet.coin_balance) * current_price)
         fee = (new_balance / 100) * 0.05
@@ -210,6 +212,8 @@ class BinanceInterface:
 
     @staticmethod
     def buy(current_price, decision_settings):
+        """Buys coin from its current price according to decision settings.
+        """
         wallet = Wallet.objects.first()
         new_coin_balance = (float(wallet.total_balance) / current_price)
         wallet.total_balance = 0
