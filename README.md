@@ -5,7 +5,7 @@ may see some errors, but not critical ones)
 * Install postgre-12, create db with creds:
   * db name: dobotdb
   * user: dobot
-  * password: dobotpass06
+  * password: safa0606
 * Makemigrations & migrate.
 
 # Redis
