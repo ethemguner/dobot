@@ -98,7 +98,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": get_environment_variable("DBNAME") or "dobotdb",
         "USER": get_environment_variable("DBUSER") or "dobot",
-        "PASSWORD": get_environment_variable("DBPASSWORD") or "safa0606",
+        "PASSWORD": get_environment_variable("DBPASSWORD") or "dobotpass06",
         "HOST": get_environment_variable("DBHOST") or "localhost",
         "PORT": "5432",
     }
