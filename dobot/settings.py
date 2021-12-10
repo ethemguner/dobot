@@ -151,8 +151,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Binance components.
-BINANCE_KEY = "a8pKA4SvDHfrImyyp1A9J76iBS5rwJ7D2ku2CIy5EqFXcffgqv78AbFt7sD1uJSR"
-BINANCE_SECRET = "wNJhkCMSFIzlIu1aI5VHExh9MlvuqgTOKnG1wZGgZ9WIRYld5kZnNinURuyByj3Q"
+BINANCE_KEY = "KyrqqFQOkuYGzGTFUzboIIbkBsn8o2WtdB4TayEwN8pmNt0f0xOqAVTCkmxzHtB4"
+BINANCE_SECRET = "z1n50iQkKqD0iHytpWLdWfUvwHVVOkPZ0bHxqt43Hd6UCRyMtv6lvSQQgOdqhYgH"
 
 CHANNEL_LAYERS = {
     'default': {
