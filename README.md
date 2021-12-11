@@ -15,9 +15,20 @@ may see some errors, but not critical ones)
 * Straightforward install, nothing complicated.
 * Don't forget to install rabbitmq plugin to browse ui.
 
-# Running System
-If you run the server you will see nothing is happening. Because you need to
-activate celery and celerybeat to get some action.
+# Running System Over Binance Websocket (Recommended)
+* Open a new terminal
+* Go to project path.
+* Activate your environment.
+* Run ```python3 binance_websocket_listener.py```
+
+You may encounter binance API errors because requests are restricted. 
+Only produ
+
+# Running System Over Celery Service
+Because we're sending processes to query, you may encounter delays in price
+changes. Also there is a 2.35 seconds delay in code, otherwise binance is
+throwing connection timeout error. This is why using binance websocket listener
+is recommended.
 
 ### Open two terminal, in one of them run in dobot/dobot
 
