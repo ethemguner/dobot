@@ -1,5 +1,5 @@
 # Django Setup
-* Create your environment. Python 3.6.5 & 3.8.10 is fine.
+* Create your environment. Python 3.7+ version required.
 * Install requirements.txt to the environment. (If you're using 3.8 python you 
 may see some errors, but not critical ones)
 * Install postgre-12, create db with creds:
