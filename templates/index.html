@@ -13,6 +13,16 @@
     <div class="row" style="margin-top: 100px">
         <div class="col-lg-12">
             <h1 class="text-center">Real Time Crypto Currency Price Tracker</h1>
+            <div class="row justify-content-center">
+                <div class="text-center" style="margin-bottom: 20px">
+                    <i>Dobot is synced with <a href="https://www.binance.com/" style="text-decoration: none;">binance.com</a></i><br>
+                    <button class="btn btn-success" style="margin-top: 5px">
+                        <span class="spinner-grow spinner-grow-sm"></span>
+                            Streaming...
+                    </button>
+                </div>
+                <canvas id="myChart" height="20vh" width="80vw"></canvas>
+            </div>
         </div>
         <div class="row justify-content-center" style="margin-top: 100px;">
             {% for humanized_symbol, data in change_data.items %}
@@ -44,16 +54,6 @@
             {% endfor %}
             <div style="margin-top: 50px;">
                 <h3 class="text-center">Change Graph</h3>
-                <div class="row justify-content-center">
-                    <div class="text-center" style="margin-bottom: 20px">
-                        Dobot is synced with <a href="https://www.binance.com/" style="text-decoration: none;">binance.com</a><br>
-                        <button class="btn btn-success">
-                            <span class="spinner-grow spinner-grow-sm"></span>
-                            Streaming...
-                      </button>
-                    </div>
-                    <canvas id="myChart" height="20vh" width="80vw"></canvas>
-                </div>
             </div>
         </div>
     </div>
