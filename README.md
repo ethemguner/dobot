@@ -22,7 +22,7 @@ may see some errors, but not critical ones)
 * Run ```python3 binance_websocket_listener.py```
 
 You may encounter binance API errors because requests are restricted. 
-Only produ
+Only production server can make API calls.
 
 # Running System Over Celery Service
 Because we're sending processes to query, you may encounter delays in price
