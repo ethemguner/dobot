@@ -26,13 +26,13 @@
         </div>
         <div class="col-lg-12">
             <div class="row justify-content-center" style="margin-top: 50px;">
-                <table class="table table-striped table-dark table-bordered">
-                    <thead>
+                <table class="table table-striped table-bordered text-center">
+                    <thead class="thead-dark">
                         <tr>
                             <th scope="col">Coin</th>
-                            <th scope="col">Price</th>
-                            <th scope="col">Change Value</th>
-                            <th scope="col">Change Ratio</th>
+                            <th scope="col">Price ($)</th>
+                            <th scope="col">Change Value ($)</th>
+                            <th scope="col">Change Ratio (%)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -134,15 +134,15 @@
         let current_price_element = document.getElementById(symbol + "_current_price")
 
         if (change_value > 0.00){
-            change_value_element.innerHTML = "+" + String(change_value) + "$"
-            change_ratio_element.innerHTML = String(`(+${change_ratio}%)`)
+            change_value_element.innerHTML = "+" + String(change_value)
+            change_ratio_element.innerHTML = String(`+${change_ratio}`)
             current_price_element.innerHTML = String(current_price) + " " + '<i class="fas fa-caret-up" style="color: green"></i>'
             change_value_element.style.color = "green"
             change_ratio_element.style.color = "green"
             current_price_element.style.color = "green"
         } else if (change_value < 0.00) {
-            change_value_element.innerHTML = String(change_value) + "$"
-            change_ratio_element.innerHTML = String(`(${change_ratio}%)`)
+            change_value_element.innerHTML = String(change_value)
+            change_ratio_element.innerHTML = String(`${change_ratio}`)
             current_price_element.innerHTML = String(current_price) + " " + '<i class="fas fa-caret-down" style="color: red"></i>'
             change_value_element.style.color = "red"
             change_ratio_element.style.color = "red"
