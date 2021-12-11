@@ -1,7 +1,7 @@
 from celery import Celery
 from celery import shared_task
 
-from apis.binance import BinanceInterface
+from apis.binance_api import BinanceInterface
 
 app = Celery('tasks', broker='pyamqp://guest@localhost//')
 binance_interface = BinanceInterface()
