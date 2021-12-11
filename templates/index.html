@@ -46,7 +46,7 @@
                 <h3 class="text-center">Change Graph</h3>
                 <div class="row justify-content-center">
                     <div class="text-center" style="margin-bottom: 20px">
-                        Total change from {{ first_change.created }} is <b><span id="total_change"></span></b>
+                        <div uk-spinner></div> Dobot synced with <a href="https://www.binance.com/">Binance</a>
                     </div>
                     <canvas id="myChart" height="20vh" width="80vw"></canvas>
                 </div>
@@ -65,7 +65,7 @@
     const data = {
       labels: [],
       datasets: [{
-        label: 'BTC Percental Changes in 2.35 seconds',
+        label: 'BTC Instantaneous Percental Changes',
         backgroundColor: 'rgb(255, 99, 132)',
         borderColor: 'rgb(255, 99, 132)',
         data: [],
@@ -132,11 +132,9 @@
         let symbol = data.message["symbol"]
         let change_value = data.message["change_value"]
         let change_ratio = data.message["change_ratio"]
-        let total_change = data.message["total_change"]
         let created = data.message["created"]
         let symbol_element = document.getElementById(symbol)
         let change_element = document.getElementById(symbol + "_change_value")
-        let total_change_element = document.getElementById("total_change")
 
         if (change_value > 0.00){
             change_element.innerHTML = "+" + String(change_value) + "$" + " " + String(`(+${change_ratio}%)`)
@@ -155,8 +153,6 @@
             symbol_element.innerHTML = String(current_price)
             symbol_element.style.color = "black"
         }
-
-        total_change_element.innerText = String(total_change) + "%"
 
         if (change_value !== previous_data && symbol === "BTCUSDT"){
             addData(myChart, created, parseFloat(change_ratio))
