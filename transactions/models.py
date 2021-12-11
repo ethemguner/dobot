@@ -43,6 +43,12 @@ class Transaction(models.Model):
         on_delete=models.CASCADE
     )
 
+    created = models.DateTimeField(
+        verbose_name="Created at",
+        auto_now_add=True,
+        null=True
+    )
+
     def __str__(self):
         return "{}, {}, {}".format(
             self.transaction_type,
