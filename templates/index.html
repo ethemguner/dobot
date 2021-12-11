@@ -24,34 +24,29 @@
                 <canvas id="myChart" height="20vh" width="80vw"></canvas>
             </div>
         </div>
-        <div class="row justify-content-center" style="margin-top: 100px;">
-            {% for humanized_symbol, data in change_data.items %}
-                <div class="col-lg-4 text-center">
-                    <h3>{{ humanized_symbol }}</h3>
-                    {% if data.change > 0.00 %}
-                        <h4 id="{{ data.symbol }}" style="color: green">
-                            {{ data.price }}
-                            <i class="fas fa-caret-up" style="color: green"></i>
-                        </h4>
-                    {% elif data.change < 0.00 %}
-                        <h4 id="{{ data.symbol }}" style="color: red">
-                            {{ data.price }} <i class="fas fa-caret-down" style="color: red"></i>
-                        </h4>
-                    {% elif data.change == 0.00 %}
-                        <h4 id="{{ data.symbol }}" style="color: black">
-                            {{ data.price }}
-                        </h4>
-                    {% endif %}
-                    <h4>Change:</h4>
-                    <h5><span id="{{ data.symbol }}_change_value">
-                        {% if data.change > 0.00 %}
-                            +{{ data.change }}$ (+{{ data.change_ratio }}%)
-                        {% else %}
-                            {{ data.change }}$ ({{ data.change_ratio }}%)
-                        {% endif %}
-                    </span></h5>
-                </div>
-            {% endfor %}
+        <div class="col-lg-12">
+            <div class="row justify-content-center" style="margin-top: 50px;">
+                <table class="table table-striped table-dark table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Coin</th>
+                            <th scope="col">Price</th>
+                            <th scope="col">Change Value</th>
+                            <th scope="col">Change Ratio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for coin in coins %}
+                        <tr>
+                            <th scope="row">{{ coin.symbol }}</th>
+                            <td id="{{ coin.symbol }}_current_price">no coin data stream</td>
+                            <td id="{{ coin.symbol }}_change_value">no coin data stream</td>
+                            <td id="{{ coin.symbol }}_change_ratio">no coin data stream</td>
+                        </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -134,25 +129,38 @@
         let change_value = data.message["change_value"]
         let change_ratio = data.message["change_ratio"]
         let created = data.message["created"]
-        let symbol_element = document.getElementById(symbol)
-        let change_element = document.getElementById(symbol + "_change_value")
+        let change_value_element = document.getElementById(symbol + "_change_value")
+        let change_ratio_element = document.getElementById(symbol + "_change_ratio")
+        let current_price_element = document.getElementById(symbol + "_current_price")
 
         if (change_value > 0.00){
-            change_element.innerHTML = "+" + String(change_value) + "$" + " " + String(`(+${change_ratio}%)`)
-            symbol_element.innerHTML = String(current_price) + " " + '<i class="fas fa-caret-up" style="color: green"></i>'
-            symbol_element.style.color = "green"
+            change_value_element.innerHTML = "+" + String(change_value) + "$"
+            change_ratio_element.innerHTML = String(`(+${change_ratio}%)`)
+            current_price_element.innerHTML = String(current_price) + " " + '<i class="fas fa-caret-up" style="color: green"></i>'
+            change_value_element.style.color = "green"
+            change_ratio_element.style.color = "green"
+            current_price_element.style.color = "green"
         } else if (change_value < 0.00) {
-            change_element.innerHTML = String(change_value) + "$" + " " + String(`(${change_ratio}%)`)
-            symbol_element.innerHTML = String(current_price) + " " + '<i class="fas fa-caret-down" style="color: red"></i>'
-            symbol_element.style.color = "red"
+            change_value_element.innerHTML = String(change_value) + "$"
+            change_ratio_element.innerHTML = String(`(${change_ratio}%)`)
+            current_price_element.innerHTML = String(current_price) + " " + '<i class="fas fa-caret-down" style="color: red"></i>'
+            change_value_element.style.color = "red"
+            change_ratio_element.style.color = "red"
+            current_price_element.style.color = "red"
         } else if (change_value === 0.00) {
-            change_element.innerText = String(change_value) + "$" + " " + String(`(${change_ratio}%)`)
-            symbol_element.innerHTML = String(current_price)
-            symbol_element.style.color = "black"
+            change_value_element.innerHTML = String(change_value) + "$"
+            change_ratio_element.innerHTML = String(`(${change_ratio}%)`)
+            current_price_element.innerHTML = String(current_price)
+            change_value_element.style.color = "white"
+            change_ratio_element.style.color = "white"
+            current_price_element.style.color = "white"
         } else {
-            change_element.innerText = String(change_value) + "$" + " " + String(`(${change_ratio}%)`)
-            symbol_element.innerHTML = String(current_price)
-            symbol_element.style.color = "black"
+            change_value_element.innerHTML = String(change_value) + "$"
+            change_ratio_element.innerHTML = String(`(${change_ratio}%)`)
+            current_price_element.innerHTML = String(current_price)
+            change_value_element.style.color = "white"
+            change_ratio_element.style.color = "white"
+            current_price_element.style.color = "white"
         }
 
         if (change_value !== previous_data && symbol === "BTCUSDT"){
