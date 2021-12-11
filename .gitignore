@@ -360,3 +360,4 @@ fabric.properties
 /staticfiles/
 /celerybeat/
 /celery/
+activate
