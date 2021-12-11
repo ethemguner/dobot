@@ -6,7 +6,7 @@ from binance import ThreadedWebsocketManager
 from channels.layers import get_channel_layer
 from django.utils import timezone
 
-from .binance_api import BinanceInterface
+from binance_api import BinanceInterface
 from coins.models import Coin
 
 logger = logging.getLogger(__name__)
