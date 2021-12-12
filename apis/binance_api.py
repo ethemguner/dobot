@@ -183,6 +183,7 @@ class BinanceInterface:
         """Sells coin from its current price according to decision settings.
         """
         wallet = Wallet.objects.first()
+        coin_amount = wallet.coin_balance
         new_balance = (float(wallet.coin_balance) * current_price)
         fee = (new_balance / 100) * 0.05
         new_balance -= fee
@@ -203,6 +204,9 @@ class BinanceInterface:
             coin=coin,
             wallet=wallet,
             decision=decision,
+            commission_amount=float(fee),
+            money_amount=float(new_balance),
+            coin_amount=float(coin_amount)
         )
 
         decision_settings.entry_price_level = float(current_price)
@@ -215,6 +219,7 @@ class BinanceInterface:
         """Buys coin from its current price according to decision settings.
         """
         wallet = Wallet.objects.first()
+        money_amount = wallet.total_balance
         new_coin_balance = (float(wallet.total_balance) / current_price)
         wallet.total_balance = 0
         wallet.coin_balance = new_coin_balance
@@ -233,6 +238,8 @@ class BinanceInterface:
             coin=coin,
             wallet=wallet,
             decision=decision,
+            money_amount=float(money_amount),
+            coin_amount=float(new_coin_balance)
         )
 
         decision_settings.entry_price_level = float(current_price)
