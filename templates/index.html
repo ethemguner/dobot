@@ -52,6 +52,11 @@
         <div class="col-lg-12">
             <div class="row justify-content-center" style="margin-top: 50px;">
                 <h3 class="text-center">Recent Transactions</h3>
+                <p class="text-small">
+                    <b>Coin balance:</b>
+                    {{ wallet.coin_balance }}<br>
+                    <b>Total balance:</b> {{ wallet.total_balance }}
+                </p>
                 <table class="table table-bordered text-center">
                     <thead class="thead-dark">
                         <tr>
