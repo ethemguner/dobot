@@ -55,7 +55,8 @@
                 <p class="text-small">
                     <b>Coin balance:</b>
                     {{ wallet.coin_balance }}<br>
-                    <b>Total balance:</b> {{ wallet.total_balance }}
+                    <b>Total balance:</b> {{ wallet.total_balance }}<br>
+                    <b>Current state:</b> {{ decision_setting.get_action }}$
                 </p>
                 <table class="table table-bordered text-center">
                     <thead class="thead-dark">
