@@ -362,3 +362,4 @@ fabric.properties
 /celery/
 activate
 /.idea
+/.DS_Store
