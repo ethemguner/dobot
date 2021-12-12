@@ -14,10 +14,15 @@ from os import environ
 from pathlib import Path
 
 import rollbar
+from django.core.exceptions import ImproperlyConfigured
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 
-from django.core.exceptions import ImproperlyConfigured
+
+def get_environment_variable(setting):
+    return environ.get(setting)
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,17 +30,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-%tyxpn+x)=60+e@ruguew#x5kt=xi@9#4!$1o)b$q9z3dr-12o'
+SECRET_KEY = get_environment_variable("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-
-
-def get_environment_variable(setting):
-    return environ.get(setting)
-
 
 # Application definition
 INSTALLED_APPS = [
@@ -89,21 +89,19 @@ TEMPLATES = [
 WSGI_APPLICATION = 'dobot.wsgi.application'
 ASGI_APPLICATION = 'dobot.asgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": get_environment_variable("DBNAME") or "dobotdb",
-        "USER": get_environment_variable("DBUSER") or "dobot",
-        "PASSWORD": get_environment_variable("DBPASSWORD") or "safa0606",
-        "HOST": get_environment_variable("DBHOST") or "localhost",
-        "PORT": "5432",
+        "NAME": get_environment_variable("DB_NAME"),
+        "USER": get_environment_variable("DB_USER"),
+        "PASSWORD": get_environment_variable("DB_PASSWORD"),
+        "HOST": get_environment_variable("DB_HOST"),
+        "PORT": get_environment_variable("DB_PORT"),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -123,7 +121,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
@@ -136,7 +133,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
@@ -151,29 +147,28 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Binance components.
-BINANCE_KEY = "KyrqqFQOkuYGzGTFUzboIIbkBsn8o2WtdB4TayEwN8pmNt0f0xOqAVTCkmxzHtB4"
-BINANCE_SECRET = "z1n50iQkKqD0iHytpWLdWfUvwHVVOkPZ0bHxqt43Hd6UCRyMtv6lvSQQgOdqhYgH"
+BINANCE_KEY = get_environment_variable("BINANCE_KEY")
+BINANCE_SECRET = get_environment_variable("BINANCE_SECRET")
 
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
+            "hosts": [(get_environment_variable("REDISTHOST"), get_environment_variable("REDIS_PORT"))],
         },
     },
 }
 
 # Celery stuff.
-BROKER_URL = 'amqp://localhost'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+BROKER_URL = get_environment_variable("BROKER_URL")
+CELERY_RESULT_BACKEND = get_environment_variable("CELERY_RESULT_BACKEND")
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Europe/Istanbul'
 
-
 # TODO: get_environment_variable
-ROLLBAR_ACCESS_TOKEN = "ec4c306cbaef49e48680d79f3b37c9ff"
+ROLLBAR_ACCESS_TOKEN = get_environment_variable("ROLLBAR_ACCESS_TOKEN")
 
 ROLLBAR = {
     'access_token': ROLLBAR_ACCESS_TOKEN,
