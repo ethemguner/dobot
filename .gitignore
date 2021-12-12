@@ -361,3 +361,4 @@ fabric.properties
 /celerybeat/
 /celery/
 activate
+/.idea
