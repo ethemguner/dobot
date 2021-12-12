@@ -42,7 +42,7 @@ importlib-metadata==4.8.2
 importlib-resources==5.4.0
 incremental==21.3.0
 ipdb==0.13.9
-ipython==7.16.2
+ipython==7.30.0
 ipython-genutils==0.2.0
 jedi==0.17.2
 kombu==5.1.0
