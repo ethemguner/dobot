@@ -8,7 +8,7 @@ def dashboard(request):
     return render(
         request, "index.html", context={
             "coins": Coin.objects.all(),
-            "transactions": Transaction.objects.all()
+            "transactions": Transaction.objects.all().order_by("-id")
         }
     )
 
