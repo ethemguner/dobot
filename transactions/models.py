@@ -21,6 +21,27 @@ class Transaction(models.Model):
         null=True,
         blank=True
     )
+    money_amount = models.DecimalField(
+        verbose_name="Money Amount Transacted",
+        max_digits=19,
+        decimal_places=11,
+        null=True,
+        blank=True
+    )
+    coin_amount = models.DecimalField(
+        verbose_name="Coin Amount Transacted",
+        max_digits=19,
+        decimal_places=11,
+        null=True,
+        blank=True
+    )
+    commission_amount = models.DecimalField(
+        verbose_name="Commission Amount",
+        max_digits=19,
+        decimal_places=11,
+        null=True,
+        blank=True
+    )
     coin = models.ForeignKey(
         to="coins.Coin",
         verbose_name="Coin Transacted",

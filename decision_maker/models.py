@@ -89,3 +89,14 @@ class DecisionSetting(models.Model):
             self.ratio_to_sell,
             self.ratio_to_buy,
         )
+
+    def get_action(self):
+        if not self.dont_buy:
+            action_value = (self.entry_price_level / 100) * self.ratio_to_buy
+            action_value = self.entry_price_level + action_value
+            return f"System will buy If {self.coin.symbol} will be {action_value}"
+        if not self.dont_sell:
+            action_value = (self.entry_price_level / 100) * self.ratio_to_sell
+            action_value = self.entry_price_level + action_value
+            return f"System will sell If {self.coin.symbol} will be {action_value}"
+        return "System will do not take an action right now."

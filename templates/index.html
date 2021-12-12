@@ -26,6 +26,7 @@
         </div>
         <div class="col-lg-12">
             <div class="row justify-content-center" style="margin-top: 50px;">
+            <h3 class="text-center">Dobot Target Coins</h3>
                 <table class="table table-bordered text-center">
                     <thead class="thead-dark">
                         <tr>
@@ -42,6 +43,43 @@
                             <td id="{{ coin.symbol }}_current_price">no coin data stream</td>
                             <td id="{{ coin.symbol }}_change_value">no coin data stream</td>
                             <td id="{{ coin.symbol }}_change_ratio">no coin data stream</td>
+                        </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="row justify-content-center" style="margin-top: 50px;">
+                <h3 class="text-center">Recent Transactions</h3>
+                <p class="text-small">
+                    <b>Coin balance:</b>
+                    {{ wallet.coin_balance }}<br>
+                    <b>Total balance:</b> {{ wallet.total_balance }}<br>
+                    <b>Current state:</b> {{ decision_setting.get_action }}$
+                </p>
+                <table class="table table-bordered text-center">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Coin</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Money Amount ($)</th>
+                            <th scope="col">Coin Amount</th>
+                            <th scope="col">Commission Amount ($)</th>
+                            <th scope="col">Decided Price Level ($)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for transaction in transactions %}
+                        <tr>
+                            <th scope="row">{{ transaction.coin.symbol }}</th>
+                            <td>{{ transaction.created }}</td>
+                            <td>{{ transaction.transaction_type }}</td>
+                            <td>{{ transaction.money_amount }}</td>
+                            <td>{{ transaction.coin_amount }}</td>
+                            <td>{{ transaction.commission_amount }}</td>
+                            <td>{{ transaction.decision.price_level }}</td>
                         </tr>
                     {% endfor %}
                   </tbody>
