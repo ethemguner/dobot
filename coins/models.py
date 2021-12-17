@@ -11,11 +11,13 @@ class Coin(models.Model):
     COIN_BTC = "BTCUSDT"
     COIN_ETH = "ETHUSDT"
     COIN_BNB = "BNBUSDT"
+    COIN_ADA = "ADAUSDT"
 
     COIN_SYMBOLS = (
         (COIN_BTC, "Bitcoin/USD"),
         (COIN_ETH, "Etherium/USD"),
-        (COIN_BNB, "Binance Coin/USD")
+        (COIN_BNB, "Binance Coin/USD"),
+        (COIN_ADA, "Cardano/USD"),
     )
 
     symbol = models.CharField(
@@ -26,7 +28,7 @@ class Coin(models.Model):
     current_price = models.DecimalField(
         verbose_name="Current Price",
         max_digits=19,
-        decimal_places=2
+        decimal_places=6
     )
     last_update = models.DateTimeField(
         verbose_name="Last Update",
@@ -50,12 +52,12 @@ class CoinPriceChange(models.Model):
     price = models.DecimalField(
         verbose_name="Price",
         max_digits=19,
-        decimal_places=2
+        decimal_places=5
     )
     change = models.DecimalField(
         verbose_name="Change",
         max_digits=19,
-        decimal_places=2
+        decimal_places=5
     )
     coin = models.ForeignKey(
         to="coins.Coin",
@@ -66,7 +68,7 @@ class CoinPriceChange(models.Model):
     change_ratio = models.DecimalField(
         verbose_name="Change",
         max_digits=19,
-        decimal_places=4,
+        decimal_places=5,
         null=True,
         blank=True
     )
