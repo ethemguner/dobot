@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     'wallet',
     'decision_maker',
     'transactions',
-    'whitenoise.runserver_nostatic'
+    'whitenoise.runserver_nostatic',
+    'notifications'
 ]
 
 MIDDLEWARE = [
@@ -177,3 +178,10 @@ ROLLBAR = {
 }
 
 rollbar.init(**ROLLBAR)
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = get_environment_variable("EMAIL_HOST")
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = get_environment_variable("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = get_environment_variable("EMAIL_HOST_PASSWORD")

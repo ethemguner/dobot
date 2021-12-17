@@ -190,18 +190,18 @@
             current_price_element.style.color = "red"
         } else if (change_value === 0.00) {
             change_value_element.innerHTML = String(change_value) + "$"
-            change_ratio_element.innerHTML = String(`(${change_ratio}%)`)
+            change_ratio_element.innerHTML = String(`${change_ratio}%`)
             current_price_element.innerHTML = String(current_price)
-            change_value_element.style.color = "white"
-            change_ratio_element.style.color = "white"
-            current_price_element.style.color = "white"
+            change_value_element.style.color = "black"
+            change_ratio_element.style.color = "black"
+            current_price_element.style.color = "black"
         } else {
             change_value_element.innerHTML = String(change_value) + "$"
             change_ratio_element.innerHTML = String(`(${change_ratio}%)`)
             current_price_element.innerHTML = String(current_price)
-            change_value_element.style.color = "white"
-            change_ratio_element.style.color = "white"
-            current_price_element.style.color = "white"
+            change_value_element.style.color = "black"
+            change_ratio_element.style.color = "black"
+            current_price_element.style.color = "black"
         }
 
         if (change_value !== previous_data && symbol === "BTCUSDT"){
