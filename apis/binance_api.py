@@ -261,15 +261,11 @@ class BinanceInterface:
         for decision_setting in decision_settings:
             change_value = float(current_price) - float(decision_setting.entry_price_level)
 
-            ratio = float((change_value / current_price) * 100)
+            ratio = float((change_value / float(current_price)) * 100)
 
-            message = "Coin: %s, ratio: %s" % (coin.symbol, ratio)
-            print(message)
             if ratio > 0 and ratio > decision_setting.ratio_to_sell and not decision_setting.dont_sell:
-                print("deciding to sell!!!")
                 self.sell(current_price, decision_setting)
             if 0 > ratio < decision_setting.ratio_to_buy and not decision_setting.dont_buy:
-                print("deciding to buy!!!")
                 self.buy(current_price, decision_setting)
 
     def sell(self, current_price, decision_setting):
