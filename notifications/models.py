@@ -14,7 +14,6 @@ class Subscription(models.Model):
     )
     target_coins = models.ManyToManyField(
         to="coins.Coin",
-        null=True,
         blank=True,
         verbose_name="Coins targeted"
     )

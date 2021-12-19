@@ -1,5 +1,7 @@
 from django.db import models
 
+from wallet.models import Wallet
+
 
 class Decision(models.Model):
     class Meta:
@@ -40,9 +42,26 @@ class Decision(models.Model):
         null=True,
         blank=True
     )
+    wallet = models.ForeignKey(
+        to="wallet.Wallet",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        verbose_name="Wallet Decided"
+    )
+    created = models.DateTimeField
 
     def __str__(self):
-        return "{} from {}".format(self.type_of_decision, self.price_level)
+        if self.wallet:
+            return f"[{self.coin.symbol}] " \
+                   f"({self.wallet.name}) " \
+                   f"{self.type_of_decision} from {self.price_level} " \
+                   f"| {self.wallet.name}"
+        else:
+            return f"[{self.coin.symbol}] " \
+                   f"({self.wallet.name}) " \
+                   f"{self.type_of_decision} from {self.price_level} " \
+                   f"| no wallet defined"
 
 
 class DecisionSetting(models.Model):
@@ -67,28 +86,48 @@ class DecisionSetting(models.Model):
     ratio_to_sell = models.DecimalField(
         verbose_name="Ratio to Sell",
         max_digits=19,
-        decimal_places=2,
+        decimal_places=11,
     )
     ratio_to_buy = models.DecimalField(
         verbose_name="Ratio to Buy",
         max_digits=19,
-        decimal_places=2,
+        decimal_places=11,
+        null=True,
+        blank=True
+    )
+    allocated_money_amount = models.DecimalField(
+        verbose_name="Allocated Money",
+        max_digits=19,
+        decimal_places=11,
         null=True,
         blank=True
     )
     dont_buy = models.BooleanField(
-        default=True
+        default=False
     )
     dont_sell = models.BooleanField(
-        default=True
+        default=False
     )
 
     def __str__(self):
-        return "Price Level: {} - Sell Ratio: {} - Buy Ratio {}".format(
+        wallets = Wallet.objects.filter(decision_setting=self).values_list("name", flat=True)
+        wallet_names = ",".join(wallets)
+        message = "[{}] Price Level: {} | Allocated Money: {} ".format(
+            self.coin.symbol,
             self.entry_price_level,
-            self.ratio_to_sell,
-            self.ratio_to_buy,
+            self.allocated_money_amount
         )
+        if not self.dont_buy and self.dont_sell:
+            message += "| Buy if coin decreases %{} ".format(self.ratio_to_buy)
+        elif self.dont_buy and not self.dont_sell:
+            message += "| Sell if coin increases %{} ".format(self.ratio_to_sell)
+        else:
+            message += "| Passive state, do nothing. "
+
+        if wallet_names:
+            message += "({})".format(wallet_names)
+
+        return message
 
     def get_action(self):
         if not self.dont_buy:
