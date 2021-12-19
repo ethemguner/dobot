@@ -22,7 +22,7 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 # Load task modules from all registered Django apps.
 app.autodiscover_tasks()
 
-UPDATE_COINS_FREQUENCY = 60
+UPDATE_COINS_FREQUENCY = 60 * 60
 
 
 @app.task(bind=True)
