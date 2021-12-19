@@ -11,7 +11,7 @@ from decision_maker.models import DecisionSetting, Decision
 from notifications.models import Subscription, Notification
 from notifications.tasks import push_notifications_task
 from transactions.models import Transaction
-from wallet.models import Wallet
+from wallet.models import Wallet, CoinAsset
 
 
 class BinanceInterface:
@@ -26,8 +26,6 @@ class BinanceInterface:
         self.api_key = api_key
         self.api_secret = api_secret
         self.client = Client(self.api_key, self.api_secret)
-        self.SUBJECT_ALERT_INCREASE = "Increase"
-        self.SUBJECT_ALERT_DECREASE = "Decrease"
 
     def _selected_interval(self, interval):
         """Returns interval type from python-binance package client.
@@ -117,7 +115,8 @@ class BinanceInterface:
     def _get_value_as_decimal(value):
         return Decimal(value).quantize(Decimal("0.00"))
 
-    def _create_notification(self, coin_price_change, previous_price, subscription, has_increased):
+    @staticmethod
+    def _create_notification(coin_price_change, previous_price, subscription, has_increased):
         coin_symbol = coin_price_change.coin.symbol
         if has_increased:
             subject = "Dobot Alert - Abnormal Increase Alert | {} is increased {}% in 30 minutes.".format(
@@ -231,93 +230,164 @@ class BinanceInterface:
                 for coin in coins:
                     if ticker.get("symbol") == coin.symbol:
                         previous_price = coin.current_price
-                        coin.current_price = float(ticker.get("price"))
-                        coin.last_update = timezone.now()
-                        coin.save()
+
+                        coin = self._update_coin_current_price(
+                            coin=coin,
+                            current_price=float(ticker.get("price"))
+                        )
+
                         self.create_price_change(
                             coin,
                             previous_price,
                             ticker.get("price")
                         )
+
                         updated_coins.append(coin)
 
-    def decide(self, current_price):
-        decision_settings = DecisionSetting.objects.first()
-        change_value = current_price - float(decision_settings.entry_price_level)
+                        self.decide(coin)
 
-        ratio = float((change_value / current_price) * 100)
+    def _update_coin_current_price(self, coin, current_price):
+        coin.current_price = current_price
+        coin.last_update = timezone.now()
+        coin.save()
+        return coin
 
-        # TODO: by desicion
-        if ratio > 0 and ratio > decision_settings.ratio_to_sell and not decision_settings.dont_sell:
-            self.sell(current_price, decision_settings)
-        if 0 > ratio < decision_settings.ratio_to_buy and not decision_settings.dont_buy:
-            self.buy(current_price, decision_settings)
+    def decide(self, coin):
+        current_price = coin.current_price
+        decision_settings = DecisionSetting.objects.filter(
+            coin=coin
+        ).prefetch_related("wallets")
 
-    @staticmethod
-    def sell(current_price, decision_settings):
+        for decision_setting in decision_settings:
+            change_value = float(current_price) - float(decision_setting.entry_price_level)
+
+            ratio = float((change_value / current_price) * 100)
+
+            message = "Coin: %s, ratio: %s" % (coin.symbol, ratio)
+            print(message)
+            if ratio > 0 and ratio > decision_setting.ratio_to_sell and not decision_setting.dont_sell:
+                print("deciding to sell!!!")
+                self.sell(current_price, decision_setting)
+            if 0 > ratio < decision_setting.ratio_to_buy and not decision_setting.dont_buy:
+                print("deciding to buy!!!")
+                self.buy(current_price, decision_setting)
+
+    def sell(self, current_price, decision_setting):
         """Sells coin from its current price according to decision settings.
         """
-        wallet = Wallet.objects.first()
-        coin_amount = wallet.coin_balance
-        new_balance = (float(wallet.coin_balance) * current_price)
-        fee = (new_balance / 100) * 0.05
-        new_balance -= fee
-        wallet.total_balance = new_balance
-        wallet.coin_balance = 0
-        wallet.save()
+        wallets = decision_setting.wallets.all()
+        for wallet in wallets:
+            try:
+                coin_asset = CoinAsset.objects.get(
+                    wallet=wallet, coin=decision_setting.coin
+                )
+            except CoinAsset.DoesNotExist:
+                continue
 
-        coin = Coin.objects.get(symbol=Coin.COIN_BTC)
+            coin_amount = coin_asset.balance
+            new_income = (float(coin_asset.balance) * current_price)
+            fee = (new_income / 100) * 0.05
+            new_income -= fee
+            wallet.total_balance += Decimal(new_income).quantize(Decimal('0.00000000000'))
+            coin_asset.balance = 0
+            wallet.save()
+            coin_asset.save()
 
-        decision = Decision.objects.create(
-            type_of_decision=Decision.TYPE_SELL,
-            coin=coin,
-            price_level=float(current_price),
-        )
+            decision = self._create_decision(
+                type_of_decision=Decision.TYPE_SELL,
+                coin=decision_setting.coin,
+                price_level=float(current_price),
+                wallet=wallet
+            )
 
-        Transaction.objects.create(
-            transaction_type=Transaction.TYPE_SELL,
-            coin=coin,
-            wallet=wallet,
-            decision=decision,
-            commission_amount=float(fee),
-            money_amount=float(new_balance),
-            coin_amount=float(coin_amount)
-        )
+            self._create_transaction(
+                transaction_type=Transaction.TYPE_SELL,
+                coin=decision_setting.coin,
+                wallet=wallet,
+                decision=decision,
+                money_amount=float(new_income),
+                coin_amount=float(coin_amount),
+                commission_amount=float(fee)
+            )
 
-        decision_settings.entry_price_level = float(current_price)
-        decision_settings.dont_sell = True
-        decision_settings.dont_buy = False
-        decision_settings.save()
+            decision_setting.entry_price_level = float(current_price)
+            decision_setting.allocated_money_amount = Decimal(new_income).quantize(Decimal('0.00000000000'))
+            decision_setting.dont_sell = True
+            decision_setting.dont_buy = False
+            decision_setting.save()
 
-    @staticmethod
-    def buy(current_price, decision_settings):
+    def buy(self, current_price, decision_setting):
         """Buys coin from its current price according to decision settings.
         """
-        wallet = Wallet.objects.first()
-        money_amount = wallet.total_balance
-        new_coin_balance = (float(wallet.total_balance) / current_price)
-        wallet.total_balance = 0
-        wallet.coin_balance = new_coin_balance
-        wallet.save()
+        wallets = decision_setting.wallets.all()
+        for wallet in wallets:
+            allocated_money_amount = decision_setting.allocated_money_amount
+            if wallet.total_balance - allocated_money_amount < 0:
+                # Insufficient balance!
+                continue
 
-        coin = Coin.objects.get(symbol=Coin.COIN_BTC)
+            new_coin_balance = (float(allocated_money_amount) / current_price)
+            wallet.total_balance -= Decimal(allocated_money_amount).quantize(Decimal('0.00000'))
 
+            try:
+                coin_asset = CoinAsset.objects.get(
+                    coin=decision_setting.coin,
+                    wallet=wallet
+                )
+            except CoinAsset.DoesNotExist:
+                continue
+
+            coin_asset.balance = new_coin_balance
+            wallet.save()
+            coin_asset.save()
+
+            decision = self._create_decision(
+                type_of_decision=Decision.TYPE_BUY,
+                coin=decision_setting.coin,
+                price_level=float(current_price),
+                wallet=wallet
+            )
+
+            self._create_transaction(
+                transaction_type=Transaction.TYPE_BUY,
+                coin=decision_setting.coin,
+                wallet=wallet,
+                decision=decision,
+                money_amount=float(allocated_money_amount),
+                coin_amount=float(new_coin_balance)
+            )
+
+            decision_setting.entry_price_level = float(current_price)
+            decision_setting.dont_sell = False
+            decision_setting.dont_buy = True
+            decision_setting.save()
+
+    @staticmethod
+    def _create_decision(type_of_decision, coin, price_level, wallet):
         decision = Decision.objects.create(
-            type_of_decision=Decision.TYPE_BUY,
-            coin=Coin.objects.get(symbol=Coin.COIN_BTC),
-            price_level=float(current_price),
+            type_of_decision=type_of_decision,
+            coin=coin,
+            price_level=price_level,
+            wallet=wallet
         )
+        return decision
 
+    @staticmethod
+    def _create_transaction(
+            transaction_type,
+            coin,
+            wallet,
+            decision,
+            money_amount,
+            coin_amount,
+            commission_amount=None
+    ):
         Transaction.objects.create(
-            transaction_type=Transaction.TYPE_BUY,
+            transaction_type=transaction_type,
             coin=coin,
             wallet=wallet,
             decision=decision,
             money_amount=float(money_amount),
-            coin_amount=float(new_coin_balance)
+            coin_amount=float(coin_amount),
+            commission_amount=commission_amount
         )
-
-        decision_settings.entry_price_level = float(current_price)
-        decision_settings.dont_sell = False
-        decision_settings.dont_buy = True
-        decision_settings.save()
