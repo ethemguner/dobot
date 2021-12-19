@@ -322,7 +322,7 @@ class BinanceInterface:
                 # Insufficient balance!
                 continue
 
-            new_coin_balance = (float(allocated_money_amount) / current_price)
+            new_coin_balance = (float(allocated_money_amount) / float(current_price))
             wallet.total_balance -= Decimal(allocated_money_amount).quantize(Decimal('0.00000'))
 
             try:
