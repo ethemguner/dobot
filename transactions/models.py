@@ -71,8 +71,14 @@ class Transaction(models.Model):
     )
 
     def __str__(self):
-        return "{}, {}, {}".format(
+        message = "{} action for {} while price is {} in {} | ".format(
             self.transaction_type,
             self.coin.symbol,
             self.decision.price_level,
+            self.wallet.name
         )
+        if self.transaction_type == self.TYPE_BUY:
+            message += "Bought coin amount: %s" % str(self.coin_amount)
+        else:
+            message += "Sold coin amount: %s" % str(self.coin_amount)
+        return message

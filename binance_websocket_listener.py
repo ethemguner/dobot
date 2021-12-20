@@ -18,14 +18,15 @@ from coins.models import Coin
 
 logger = logging.getLogger(__name__)
 
-print("BinanceInterface initializing.")
 binance_interface = BinanceInterface()
+print("BinanceInterface initialized and connected to Binance.")
 all_coins = Coin.objects.all()
 
-print("price_data ready.")
 price_data = {}
 for coin in all_coins:
     price_data[coin.symbol] = {"symbol": coin.symbol, "price": None, "error": None}
+
+print("price_data is ready to handle income data.")
 
 
 def update_current_price_of_coin(message):
@@ -51,6 +52,7 @@ for coin in Coin.objects.all():
     )
     listening_coins.append(ticker)
     websocket_managers[coin.symbol] = websocket_manager
+    print("Websocket thread started for %s" % coin.symbol)
 
 
 def send_to_system_websocket(coin, current_price, previous_price):
@@ -76,21 +78,21 @@ def send_to_system_websocket(coin, current_price, previous_price):
 print("All initialized! Starting to listen binance websocket.")
 previous_prices = dict()
 while True:
-    for coin, data in price_data.items():
+    for coin_symbol, data in price_data.items():
         if data["error"]:
-            ws_manager = websocket_managers[coin]
+            ws_manager = websocket_managers[coin_symbol]
             ws_manager.stop()
             ws_manager.start()
         else:
-            if previous_prices.get(coin) != data["price"]:
-                previous_price = previous_prices.get(coin)
-                previous_prices[coin] = data["price"]
-                if coin == "BTCUSDT":
-                    binance_interface.decide(data["price"])
+            if previous_prices.get(coin_symbol) != data["price"]:
+                previous_price = previous_prices.get(coin_symbol)
+                previous_prices[coin_symbol] = data["price"]
+                coin = Coin.objects.get(symbol=coin_symbol)
+                binance_interface.decide(coin)
 
                 if previous_price:
                     send_to_system_websocket(
-                        coin=coin,
+                        coin=coin_symbol,
                         current_price=data["price"],
                         previous_price=previous_price
                     )

@@ -61,6 +61,7 @@
                     <thead class="thead-dark">
                         <tr>
                             <th scope="col">Coin</th>
+                            <th scope="col">Wallet</th>
                             <th scope="col">Date</th>
                             <th scope="col">Type</th>
                             <th scope="col">Money Amount ($)</th>
@@ -73,6 +74,7 @@
                     {% for transaction in transactions %}
                         <tr>
                             <th scope="row">{{ transaction.coin.symbol }}</th>
+                            <td>{{ transaction.wallet.name }}</td>
                             <td>{{ transaction.created }}</td>
                             <td>{{ transaction.transaction_type }}</td>
                             <td>{{ transaction.money_amount }}</td>
