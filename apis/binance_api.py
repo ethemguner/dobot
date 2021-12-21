@@ -281,7 +281,7 @@ class BinanceInterface:
                 continue
 
             coin_amount = coin_asset.balance
-            new_income = (float(coin_asset.balance) * current_price)
+            new_income = (float(coin_asset.balance) * float(current_price))
             fee = (new_income / 100) * 0.05
             new_income -= fee
             wallet.total_balance += Decimal(new_income).quantize(Decimal('0.00000000000'))
