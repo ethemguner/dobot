@@ -36,6 +36,12 @@ class Subscription(models.Model):
         blank=True
     )
 
+    def __str__(self):
+        info = f"{self.email} "
+        for coin in self.target_coins.all():
+            info = f"{info} {coin}->{coin.current_price}"
+
+        return info
 
 class Notification(models.Model):
     class Meta:
