@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block TITLE %}| {{ wallet.name }}{% endblock %}
+
+{% block BODY %}
+    <div class="container">
+        <div class="row" style="margin-top: 100px">
+            <div class="col-lg-12">
+                <h3 class="text-center">{{ wallet.name }} Coin Assets</h3>
+                <table class="table table-bordered text-center" style="margin-bottom: 50px;">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Coin</th>
+                            <th scope="col">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for coin_asset in coin_assets %}
+                        <tr>
+                            <th scope="row">{{ coin_asset.coin.symbol }}</th>
+                            <td>{{ coin_asset.balance }}</td>
+                        </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+                <h3 class="text-center">{{ wallet.name }} USDT Asset & Decision Settings</h3>
+                <p class="text-center"><b>Total Balance:</b> {{ total_balance }}$</p>
+                <table class="table table-bordered" style="margin-bottom: 50px;">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Coin to Decide</th>
+                            <th scope="col" class="text-center">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for decision_setting in decision_settings %}
+                        <tr>
+                            <th scope="row">{{ decision_setting.coin.symbol }}</th>
+                            <td>
+                                <ul>
+                                    <li>{{ decision_setting.get_action }}</li>
+                                    <li>{{ decision_setting }}</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+                <h3 class="text-center">Recent Transactions</h3>
+                <table class="table table-bordered text-center">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Coin</th>
+                            <th scope="col">Created</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Money Amount ($)</th>
+                            <th scope="col">Coin Amount</th>
+                            <th scope="col">Commission Amount ($)</th>
+                            <th scope="col">Decided Price Level ($)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for transaction in transactions %}
+                        <tr>
+                            <th scope="row">{{ transaction.coin.symbol }}</th>
+                            <td>{{ transaction.created }}</td>
+                            <td>{{ transaction.transaction_type }}</td>
+                            <td>{{ transaction.money_amount }}</td>
+                            <td>{{ transaction.coin_amount }}</td>
+                            <td>{{ transaction.commission_amount }}</td>
+                            <td>{{ transaction.decision.price_level }}</td>
+                        </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

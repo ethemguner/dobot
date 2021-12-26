@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% block TITLE %}| Dashboard{% endblock %}
+{% block BODY %}
+<div class="container">
+    <div class="row" style="margin-top: 100px">
+        <div class="col-lg-12">
+            <h1 class="text-center">Real Time Crypto Currency Price Tracker</h1>
+            <div class="row justify-content-center">
+                <div class="text-center" style="margin-bottom: 20px">
+                    <i>Dobot is synced with <a href="https://www.binance.com/" style="text-decoration: none;">binance.com</a></i><br>
+                    <button class="btn btn-warning" style="margin-top: 5px" id="wsStatusButton">
+                        NO STREAM
+                    </button>
+                </div>
+                <canvas id="myChart" height="20vh" width="80vw"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="row justify-content-center" style="margin-top: 50px;">
+            <h3 class="text-center">Dobot Target Coins</h3>
+                <table class="table table-bordered text-center">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Coin</th>
+                            <th scope="col">Price ($)</th>
+                            <th scope="col">Change Value ($)</th>
+                            <th scope="col">Change Ratio (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for coin in coins %}
+                        <tr>
+                            <th scope="row">{{ coin.symbol }}</th>
+                            <td id="{{ coin.symbol }}_current_price">no coin data stream</td>
+                            <td id="{{ coin.symbol }}_change_value">no coin data stream</td>
+                            <td id="{{ coin.symbol }}_change_ratio">no coin data stream</td>
+                        </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="row justify-content-center" style="margin-top: 50px;">
+                <h3 class="text-center">Wallets</h3>
+                <ul>
+                    {% for wallet in wallets %}
+                        <li><a href="{% url 'wallet-details' wallet.id %}">{{ wallet.name }}</a></li>
+                    {% endfor %}
+                </ul>
+                <h3 class="text-center">Recent Transactions</h3>
+                <table class="table table-bordered text-center">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Coin</th>
+                            <th scope="col">Wallet</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Money Amount ($)</th>
+                            <th scope="col">Coin Amount</th>
+                            <th scope="col">Commission Amount ($)</th>
+                            <th scope="col">Decided Price Level ($)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for transaction in transactions %}
+                        <tr>
+                            <th scope="row">{{ transaction.coin.symbol }}</th>
+                            <td>{{ transaction.wallet.name }}</td>
+                            <td>{{ transaction.created }}</td>
+                            <td>{{ transaction.transaction_type }}</td>
+                            <td>{{ transaction.money_amount }}</td>
+                            <td>{{ transaction.coin_amount }}</td>
+                            <td>{{ transaction.commission_amount }}</td>
+                            <td>{{ transaction.decision.price_level }}</td>
+                        </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block SCRIPTS %}
+<script type="text/javascript">
+    const data = {
+      labels: [],
+      datasets: [{
+        label: 'BTC Instantaneous Percental Changes',
+        backgroundColor: 'rgb(255, 99, 132)',
+        borderColor: 'rgb(255, 99, 132)',
+        data: [],
+      }]
+    };
+
+    const config = {
+        type: 'line',
+        data: data,
+        options: {
+            scales: {
+                x: {
+                  title: {
+                      display: true,
+                      text: "Datetime",
+                      font: {
+                          size: 15
+                      }
+                  }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: "Change (%)",
+                        font: {
+                            size: 15
+                      }
+                    },
+                    ticks: {
+                        callback: function (value, index, values) {
+                            return "%" + value;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    const myChart = new Chart(
+    document.getElementById('myChart'),
+        config
+    );
+
+    function addData(chart, label, data) {
+        if (chart.data.labels.length > 50){
+                chart.data.labels.shift()
+            }
+        chart.data.labels.push(label);
+        chart.data.datasets.forEach((dataset) => {
+            if (dataset.data.length > 50){
+                dataset.data.shift()
+            }
+            dataset.data.push(data);
+        });
+        chart.update();
+    }
+
+    let ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
+    let socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/main_consumer/coin_stream/");
+    var previous_data = null;
+    socket.onmessage = function (event) {
+        let data = JSON.parse(event.data);
+        let current_price = data.message["current_price"]
+        let symbol = data.message["symbol"]
+        let change_value = data.message["change_value"]
+        let change_ratio = data.message["change_ratio"]
+        let created = data.message["created"]
+        let change_value_element = document.getElementById(symbol + "_change_value")
+        let change_ratio_element = document.getElementById(symbol + "_change_ratio")
+        let current_price_element = document.getElementById(symbol + "_current_price")
+
+        let ws_status_state = document.getElementById("wsStatusButton")
+        ws_status_state.innerHTML = '<span class="spinner-grow spinner-grow-sm" id="wsStatusText"></span>' + " Streaming..."
+        ws_status_state.className = "btn btn-success"
+
+        if (change_value > 0.00){
+            change_value_element.innerHTML = "+" + String(change_value)
+            change_ratio_element.innerHTML = String(`+${change_ratio}`)
+            current_price_element.innerHTML = String(current_price) + " " + '<i class="fas fa-caret-up" style="color: green"></i>'
+            change_value_element.style.color = "green"
+            change_ratio_element.style.color = "green"
+            current_price_element.style.color = "green"
+        } else if (change_value < 0.00) {
+            change_value_element.innerHTML = String(change_value)
+            change_ratio_element.innerHTML = String(`${change_ratio}`)
+            current_price_element.innerHTML = String(current_price) + " " + '<i class="fas fa-caret-down" style="color: red"></i>'
+            change_value_element.style.color = "red"
+            change_ratio_element.style.color = "red"
+            current_price_element.style.color = "red"
+        } else if (change_value === 0.00) {
+            change_value_element.innerHTML = String(change_value) + "$"
+            change_ratio_element.innerHTML = String(`${change_ratio}%`)
+            current_price_element.innerHTML = String(current_price)
+            change_value_element.style.color = "black"
+            change_ratio_element.style.color = "black"
+            current_price_element.style.color = "black"
+        } else {
+            change_value_element.innerHTML = String(change_value) + "$"
+            change_ratio_element.innerHTML = String(`(${change_ratio}%)`)
+            current_price_element.innerHTML = String(current_price)
+            change_value_element.style.color = "black"
+            change_ratio_element.style.color = "black"
+            current_price_element.style.color = "black"
+        }
+
+        if (change_value !== previous_data && symbol === "BTCUSDT"){
+            addData(myChart, created, parseFloat(change_ratio))
+        }
+
+        previous_data = change_value
+    }
+
+    var socket_error = false
+
+    socket.onclose = function (event){
+        if (socket_error){
+            let ws_status_state = document.getElementById("wsStatusButton")
+            ws_status_state.innerHTML = "CONNECTION FAILED"
+            ws_status_state.className = "btn btn-danger"
+        } else {
+            let ws_status_state = document.getElementById("wsStatusButton")
+            ws_status_state.innerHTML = "NO STREAM"
+            ws_status_state.className = "btn btn-warning"
+            socket_error = false
+        }
+    }
+
+    socket.onerror = function (event){
+        let ws_status_state = document.getElementById("wsStatusButton")
+        ws_status_state.innerHTML = "CONNECTION FAILED"
+        ws_status_state.className = "btn btn-danger"
+        socket_error = true
+    }
+
+</script>
+{% endblock %}
