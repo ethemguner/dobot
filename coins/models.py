@@ -30,7 +30,7 @@ class Coin(models.Model):
     current_price = models.DecimalField(
         verbose_name="Current Price",
         max_digits=19,
-        decimal_places=6
+        decimal_places=11
     )
     last_update = models.DateTimeField(
         verbose_name="Last Update",
