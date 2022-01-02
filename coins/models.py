@@ -19,7 +19,7 @@ class Coin(models.Model):
         (COIN_ETH, "Etherium/USD"),
         (COIN_BNB, "Binance Coin/USD"),
         (COIN_ADA, "Cardano/USD"),
-        (COIN_ADA, "ShibaInu/USD"),
+        (COIN_SHIB, "ShibaInu/USD"),
     )
 
     symbol = models.CharField(
