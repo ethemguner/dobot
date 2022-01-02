@@ -12,12 +12,14 @@ class Coin(models.Model):
     COIN_ETH = "ETHUSDT"
     COIN_BNB = "BNBUSDT"
     COIN_ADA = "ADAUSDT"
+    COIN_SHIB = "SHIBUSDT"
 
     COIN_SYMBOLS = (
         (COIN_BTC, "Bitcoin/USD"),
         (COIN_ETH, "Etherium/USD"),
         (COIN_BNB, "Binance Coin/USD"),
         (COIN_ADA, "Cardano/USD"),
+        (COIN_ADA, "ShibaInu/USD"),
     )
 
     symbol = models.CharField(
